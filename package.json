@@ -11,5 +11,8 @@
     "name": "Wesley Rodrigues",
     "url": "https://github.com/DevWesCode"
   },
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
 }
