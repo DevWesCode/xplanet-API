@@ -7,12 +7,16 @@ API REST em desenvolvimento para gerenciar o cardápio da hamburgueria **X Plane
 - `src/app.js`: configuração principal do app
 - `src/routes.js`: definição de rotas da API
 
+---
+
+## 💡 Objetivo
+Construir uma API funcional para listagem, cadastro e gerenciamento de hambúrgueres e categorias do menu da hamburgueria.
+
+---
+
 ## 📌 Status do projeto
 🚧 Em construção 🚧 
 🚧 Em breve mais detalhes 🚧
 
 ---
-
-## 💡 Objetivo
-Construir uma API funcional para listagem, cadastro e gerenciamento de hambúrgueres e categorias do menu da hamburgueria.
 
