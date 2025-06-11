@@ -1,5 +1,6 @@
 import * as Yup from "yup";
-
+import Product from "../models/Product";
+import { response } from "express";
 class productController {
   async store(request, response) {
     const schema = Yup.object({
@@ -14,7 +15,25 @@ class productController {
       return response.status(400).json({ error: err.errors });
     }
 
-    return response.status(201).json({ message: "ok" });
+    const { filename: path } = request.file;
+    const { name, price, category } = request.body;
+
+    const product = await Product.create({
+      name,
+      price,
+      category,
+      path,
+    });
+
+    return response.status(201).json(product);
+  }
+
+  async index(request, response) {
+    const products = await Product.findAll();
+
+    console.log({ userId: request.userId });
+
+    return response.json(products);
   }
 }
 

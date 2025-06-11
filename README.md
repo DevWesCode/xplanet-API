@@ -1,13 +1,12 @@
 # X Planet Burger API 🍔
 
-API RESTful em desenvolvimento para gerenciar o cardápio da hamburgueria **X Planet Burger**, com autenticação de usuários e cadastro de produtos.
+API RESTful desenvolvida para gerenciar o cardápio da hamburgueria **X Planet Burger**, com autenticação de usuários e cadastro/listagem de produtos com imagem.
 
 ---
 
 ## 📁 Estrutura do Projeto
 
-![Estrutura do Projeto](docs/estrutura-projeto-0406.png)
-
+![Estrutura do Projeto](docs/estrutura-projeto-1106.png)
 
 ---
 
@@ -21,17 +20,23 @@ API RESTful em desenvolvimento para gerenciar o cardápio da hamburgueria **X Pl
   - Criação da tabela `products`
 - [x] Cadastro de usuários (`POST /users`)
 - [x] Login com validação de senha e retorno de token JWT (`POST /session`)
+- [x] Middleware de autenticação com JWT (`authMiddleware`)
+- [x] Upload de imagens com Multer (`POST /products`)
+- [x] Listagem de produtos (`GET /products`)
+- [x] Campo virtual `url` para exibir o caminho da imagem
 - [x] Variáveis de ambiente com dotenv (`.env`)
-- [x] Multer configurado para upload (a ser utilizado nos produtos)
 
 ---
 
 ## 🔐 Autenticação
 
-- Usuários autenticados recebem um token JWT válido por 7 dias.
-- O token será necessário para acessar rotas protegidas (em breve).
+- Usuários autenticados recebem um token JWT válido por 5 dias.
+- O token é obrigatório para acessar as rotas protegidas:
+  - Cadastro de produtos
+  - Listagem de produtos
 - Configuração armazenada em: `src/config/auth.js`
-- Segredos e configs sensíveis protegidos via `.env`
+- Middleware: `src/middlewares/auth.js`
+- O token deve ser enviado via header `Authorization: Bearer <token>`
 
 ---
 
@@ -45,19 +50,38 @@ API RESTful em desenvolvimento para gerenciar o cardápio da hamburgueria **X Pl
 | email        | STRING   | Único, obrigatório             |
 | password     | STRING   | Salvo com hash (bcrypt)        |
 | admin        | BOOLEAN  | Define se é admin ou não       |
-| created_at   | DATE     | Auto gerado                    |
-| updated_at   | DATE     | Auto gerado                    |
+
 
 ### 🍔 `products`
 | Campo        | Tipo     | Regras                         |
 |--------------|----------|--------------------------------|
 | id           | INTEGER  | Auto incremento, PK            |
 | name         | STRING   | Nome do produto                |
-| price        | INTEGER  | Preço em centavos              |
+| price        | INTEGER  | Preço                          |
 | category     | STRING   | Ex: "tradicional", "vegano"    |
-| path         | STRING   | Caminho da imagem              |
-| created_at   | DATE     | Auto gerado                    |
-| updated_at   | DATE     | Auto gerado                    |
+| path         | STRING   | Caminho da imagem (Multer)     |
+| url (virtual)| VIRTUAL  | Gera a URL acessível da imagem |
+
+
+---
+
+## 📤 Upload de Imagens
+
+- Configurado com Multer (`src/config/multer.js`)
+- Imagens são salvas na pasta `/uploads`
+- A rota `POST /products` permite o upload de uma imagem via campo `file`
+- As imagens ficam acessíveis via: `http://localhost:3001/product-file`
+
+---
+
+## 🔄 Rotas
+
+| Método | Rota             | Protegida | Descrição                         |
+|--------|------------------|-----------|-----------------------------------|
+| POST   | /users           | ❌        | Cadastro de usuário               |
+| POST   | /session         | ❌        | Login e geração de token JWT      |
+| POST   | /products        | ✅        | Cadastrar novo produto (com imagem) |
+| GET    | /products        | ✅        | Listar todos os produtos          |
 
 ---
 
@@ -66,19 +90,12 @@ API RESTful em desenvolvimento para gerenciar o cardápio da hamburgueria **X Pl
 - Node.js
 - Express
 - Sequelize (ORM)
-- PostgreSQL (banco de dados)
+- PostgreSQL (banco de dados/Docker)
 - Bcrypt (hash de senha)
 - JWT (autenticação)
 - Multer (upload de arquivos)
 - Yup (validação)
 - Dotenv (variáveis de ambiente)
-
----
-
-## 📌 Status do Projeto
-
-🚧 Em construção  
-🔜 Próximo passo: CRUD de produtos com upload de imagem via Multer
 
 ---
 
@@ -96,5 +113,3 @@ yarn sequelize db:migrate
 
 # Inicie o servidor
 yarn dev
-
-
