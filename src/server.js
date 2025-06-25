@@ -3,4 +3,4 @@ dotenv.config();
 
 import app from "./app";
 
-app.listen(3001, () => console.log("Server is running at port 3001..."));
+app.listen(3001, () => console.log("Server rodando na porta 3001..."));

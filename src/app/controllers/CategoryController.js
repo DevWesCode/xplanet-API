@@ -1,15 +1,11 @@
 import * as Yup from "yup";
-import Product from "../models/Product";
 import Category from "../models/Category";
 import User from "../models/User";
 
-class ProductController {
+class CategoryController {
   async store(request, response) {
     const schema = Yup.object({
       name: Yup.string().required(),
-      price: Yup.number().required(),
-      category_id: Yup.number().required(),
-      offer: Yup.boolean(),
     });
 
     try {
@@ -25,25 +21,29 @@ class ProductController {
     }
 
     const { filename: path } = request.file;
-    const { name, price, category_id, offer } = request.body;
+    const { name } = request.body;
 
-    const product = await Product.create({
-      name,
-      price,
-      category_id,
-      path,
-      offer,
+    const categoryExist = await Category.findOne({
+      where: {
+        name,
+      },
     });
 
-    return response.status(201).json(product);
+    if (categoryExist) {
+      return response.status(400).json({ error: "Categoria já existe" });
+    }
+
+    const { id } = await Category.create({
+      name,
+      path,
+    });
+
+    return response.status(201).json({ id, name });
   }
 
   async update(request, response) {
     const schema = Yup.object({
       name: Yup.string(),
-      price: Yup.number(),
-      category_id: Yup.number(),
-      offer: Yup.boolean(),
     });
 
     try {
@@ -60,12 +60,12 @@ class ProductController {
 
     const { id } = request.params;
 
-    const findProduct = await Product.findByPk(id);
+    const categoryExist = await Category.findByPk(id);
 
-    if (!findProduct) {
-      return response.status(400).json({
-        error: "Certifique-se de que o ID do seu produto esteja correto",
-      });
+    if (!categoryExist) {
+      return response
+        .status(400)
+        .json({ message: "Tenha certeza que o ID da categoria está correto" });
     }
 
     let path;
@@ -73,15 +73,24 @@ class ProductController {
       path = request.file.filename;
     }
 
-    const { name, price, category_id, offer } = request.body;
+    const { name } = request.body;
 
-    await Product.update(
+    if (name) {
+      const categoryNameExist = await Category.findOne({
+        where: {
+          name,
+        },
+      });
+
+      if (categoryNameExist && categoryNameExist.id === +id) {
+        return response.status(400).json({ error: "Categoria já existe" });
+      }
+    }
+
+    await Category.update(
       {
         name,
-        price,
-        category_id,
         path,
-        offer,
       },
       {
         where: {
@@ -90,22 +99,16 @@ class ProductController {
       },
     );
 
-    return response.status(200).json();
+    return response.status(200).json;
   }
 
   async index(request, response) {
-    const products = await Product.findAll({
-      include: [
-        {
-          model: Category,
-          as: "category",
-          attributes: ["id", "name"],
-        },
-      ],
-    });
+    const categories = await Category.findAll();
 
-    return response.json(products);
+    console.log({ userId: request.userId });
+
+    return response.json(categories);
   }
 }
 
-export default new ProductController();
+export default new CategoryController();

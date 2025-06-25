@@ -1,7 +1,8 @@
 import * as Yup from "yup";
 import User from "../models/User";
 import authConfig from "../../config/auth";
-const jwt = require("jsonwebtoken"); //erro ao usar o import
+// const jwt = require("jsonwebtoken"); //erro ao usar o import
+import jsonwebtoken from "jsonwebtoken";
 
 class SessionController {
   async store(request, response) {
@@ -39,9 +40,13 @@ class SessionController {
       return emailOrPasswordIncorrect();
     }
 
-    const token = jwt.sign({ id: user.id }, authConfig.secret, {
-      expiresIn: authConfig.expiresIn,
-    });
+    const token = jsonwebtoken.sign(
+      { id: user.id, name: user.name },
+      authConfig.secret,
+      {
+        expiresIn: authConfig.expiresIn,
+      },
+    );
 
     return response.status(201).json({
       user: {

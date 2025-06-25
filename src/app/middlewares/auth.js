@@ -1,5 +1,5 @@
 import jsonwebtoken from "jsonwebtoken";
-import authConfig from "../config/auth";
+import authConfig from "../../config/auth";
 
 function authMiddleware(request, response, next) {
   const authToken = request.headers.authorization;
@@ -13,6 +13,7 @@ function authMiddleware(request, response, next) {
   try {
     const decoded = jsonwebtoken.verify(token, authConfig.secret);
     request.userId = decoded.id;
+    request.userName = decoded.name;
 
     return next();
   } catch (err) {
