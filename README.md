@@ -1,115 +1,193 @@
-# X Planet Burger API 🍔
+# 🍔 X-Planet Burger API (Futuro "Planeta X Burger e Fliper: Venha saboriar esta nostalgia)
 
-API RESTful desenvolvida para gerenciar o cardápio da hamburgueria **X Planet Burger**, com autenticação de usuários e cadastro/listagem de produtos com imagem.
+API RESTful robusta e escalável, desenvolvida para gerenciamento completo do cardápio, categorias e pedidos da hamburgueria **X-Planet Burger**.  
+Inclui autenticação com JWT, uploads com Multer, persistência em **PostgreSQL** e **MongoDB**, validações com Yup e estrutura modular com Sequelize.
 
 ---
 
 ## 📁 Estrutura do Projeto
 
-![Estrutura do Projeto](docs/estrutura-projeto-1106.png)
+![Estrutura da API](docs/Estrutura-API-2506.png)
+
+- `src/app/controllers/`: Lógica das rotas (User, Product, Category, Order, Session)
+- `src/app/models/`: Models Sequelize (User, Product, Category)
+- `src/app/schemas/`: Schemas Mongoose (Order)
+- `src/config/`: Configurações de autenticação (`auth.js`), upload (`multer.js`), banco de dados (`database.js`)
+- `src/database/`: Migrations e index da conexão
+- `src/app/middlewares/`: Middleware de autenticação (`auth.js`)
+- `src/routes.js`: Arquivo principal de rotas
+- `uploads/`: Imagens salvas via Multer (não versionada - ignorada via `.gitignore`)
 
 ---
 
 ## ✅ Funcionalidades Implementadas
 
-- [x] Estrutura inicial com Express
-- [x] Middleware para tratar `JSON` (`express.json()`)
-- [x] Organização em camadas (controllers, models, config, database)
-- [x] Migrations com Sequelize
-  - Criação da tabela `users`
-  - Criação da tabela `products`
-- [x] Cadastro de usuários (`POST /users`)
-- [x] Login com validação de senha e retorno de token JWT (`POST /session`)
-- [x] Middleware de autenticação com JWT (`authMiddleware`)
-- [x] Upload de imagens com Multer (`POST /products`)
-- [x] Listagem de produtos (`GET /products`)
-- [x] Campo virtual `url` para exibir o caminho da imagem
-- [x] Variáveis de ambiente com dotenv (`.env`)
+- [x] Cadastro de usuário com hash de senha (`bcrypt`)
+- [x] Login com autenticação JWT
+- [x] Middleware para rotas protegidas
+- [x] Upload de imagens para produtos e categorias (`multer`)
+- [x] Cadastro de produtos com imagem, categoria e oferta
+- [x] Edição de produtos com upload e atualização de dados
+- [x] Cadastro de categorias com imagem
+- [x] Validação de categorias repetidas
+- [x] Listagem de produtos e categorias
+- [x] Pedido com múltiplos produtos (armazenado no MongoDB)
+- [x] Atualização de status de pedido (admin)
+- [x] Relação entre produtos e categorias
+- [x] Validações com `Yup`
+- [x] Organização por camadas
+
+---
+
+## 🧪 Tecnologias Utilizadas
+
+- **Node.js**
+- **Express**
+- **Sequelize** (ORM - PostgreSQL)
+- **Mongoose** (ODM - MongoDB)
+- **PostgreSQL**
+- **MongoDB**
+- **JWT** (autenticação)
+- **Multer** (upload de imagens)
+- **Yup** (validações)
+- **Dotenv** (variáveis de ambiente)
+- **UUID** (ID de usuários)
+
+---
+
+## 🧪 Ferramentas utilizadas nos testes
+
+- **Docker**: gerenciamento de containers e bancos (PostgreSQL e MongoDB)
+- **Beekeeper Studio**: acesso e manipulação do PostgreSQL
+- **MongoDB Compass**: visualização dos dados de pedidos (NoSQL)
+- **HTTPie**: testes de rotas no terminal
 
 ---
 
 ## 🔐 Autenticação
 
+- Autenticação via **JWT**
 - Usuários autenticados recebem um token JWT válido por 5 dias.
-- O token é obrigatório para acessar as rotas protegidas:
-  - Cadastro de produtos
-  - Listagem de produtos
+- O token é necessário para acessar rotas protegidas.
 - Configuração armazenada em: `src/config/auth.js`
-- Middleware: `src/middlewares/auth.js`
-- O token deve ser enviado via header `Authorization: Bearer <token>`
+- Segredos protegidos via `.env
+- O token deve ser enviado no header:  
+  `Authorization: Bearer SEU_TOKEN_AQUI`
 
 ---
 
-## 📦 Models e Tabelas
+## 🛠️ Models & Schemas
 
-### 🧑‍💻 `users`
-| Campo        | Tipo     | Regras                         |
-|--------------|----------|--------------------------------|
-| id           | UUID     | Chave primária                 |
-| name         | STRING   | Obrigatório                    |
-| email        | STRING   | Único, obrigatório             |
-| password     | STRING   | Salvo com hash (bcrypt)        |
-| admin        | BOOLEAN  | Define se é admin ou não       |
+### 🧑‍💻 Users (PostgreSQL)
 
-
-### 🍔 `products`
-| Campo        | Tipo     | Regras                         |
-|--------------|----------|--------------------------------|
-| id           | INTEGER  | Auto incremento, PK            |
-| name         | STRING   | Nome do produto                |
-| price        | INTEGER  | Preço                          |
-| category     | STRING   | Ex: "tradicional", "vegano"    |
-| path         | STRING   | Caminho da imagem (Multer)     |
-| url (virtual)| VIRTUAL  | Gera a URL acessível da imagem |
-
+| Campo         | Tipo     | Regras                       |
+|---------------|----------|------------------------------|
+| id            | UUID     | Chave primária               |
+| name          | STRING   | Obrigatório                  |
+| email         | STRING   | Único, obrigatório           |
+| password_hash | STRING   | Hash da senha (`bcrypt`)     |
+| admin         | BOOLEAN  | Define se é admin            |
 
 ---
 
-## 📤 Upload de Imagens
+### 🍔 Products (PostgreSQL)
 
-- Configurado com Multer (`src/config/multer.js`)
-- Imagens são salvas na pasta `/uploads`
-- A rota `POST /products` permite o upload de uma imagem via campo `file`
-- As imagens ficam acessíveis via: `http://localhost:3001/product-file`
-
----
-
-## 🔄 Rotas
-
-| Método | Rota             | Protegida | Descrição                         |
-|--------|------------------|-----------|-----------------------------------|
-| POST   | /users           | ❌        | Cadastro de usuário               |
-| POST   | /session         | ❌        | Login e geração de token JWT      |
-| POST   | /products        | ✅        | Cadastrar novo produto (com imagem) |
-| GET    | /products        | ✅        | Listar todos os produtos          |
+| Campo        | Tipo      | Regras                         |
+|--------------|-----------|--------------------------------|
+| id           | INTEGER   | Chave primária auto incremento |
+| name         | STRING    | Nome do produto                |
+| price        | INTEGER   | Preço do produto               |
+| offer        | BOOLEAN   | Produto em oferta              |
+| path         | STRING    | Caminho da imagem (upload)     |
+| category_id  | INTEGER   | FK para categoria              |
+| url          | VIRTUAL   | URL pública da imagem          |
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+### 🗂️ Categories (PostgreSQL)
 
-- Node.js
-- Express
-- Sequelize (ORM)
-- PostgreSQL (banco de dados/Docker)
-- Bcrypt (hash de senha)
-- JWT (autenticação)
-- Multer (upload de arquivos)
-- Yup (validação)
-- Dotenv (variáveis de ambiente)
+| Campo        | Tipo    | Regras                         |
+|--------------|---------|--------------------------------|
+| id           | INTEGER | PK auto incremento             |
+| name         | STRING  | Nome único e obrigatório       |
+| path         | STRING  | Imagem (upload)                |
+| url          | VIRTUAL | URL da imagem pública          |
+
+---
+
+### 🧾 Orders (MongoDB)
+
+| Campo     | Tipo     | Regras                                    |
+|-----------|----------|-------------------------------------------|
+| user      | Object   | ID e nome do usuário                      |
+| products  | Array    | Lista com produtos, quantidades e preços  |
+| status    | STRING   | `Pedido Realizado`, `Em preparo`, etc.    |
+
+---
+
+## 🚀 Rotas da API
+
+### 🔓 Públicas
+
+- `POST /users` → Cadastro de usuário
+- `POST /session` → Login (retorna token JWT)
+
+---
+
+### 🔐 Privadas (requer token)
+
+#### 📦 Produtos
+- `POST /products` → Criar produto (admin)
+- `GET /products` → Listar produtos
+- `PUT /products/:id` → Atualizar produto(admin)
+
+#### 🗂️ Categorias
+- `POST /categories` → Criar categoria (admin)
+- `GET /categories` → Listar categorias 
+- `PUT /categories/:id` → Atualizar categoria (admin)
+
+#### 🧾 Pedidos
+- `POST /orders` → Criar pedido
+- `GET /orders` → Listar pedidos (admin)
+- `PUT /orders/:id` → Atualizar status (admin)
+
+---
+
+## 📌 Status do Projeto
+
+✅ **API Finalizada** 
+💬 Totalmente funcional com segurança e escalabilidade  
+📦 Sistema de categorias, produtos, usuários e pedidos prontos  
+🔐 Autenticação protegendo rotas  
+🖼️ Uploads funcionando com `Multer`  
+🧩 Integração com MongoDB finalizada
+
+---
+
+
+## 🔮 Futuras Melhorias
+
+🚀 **Interface** 🚀
+- Integração com frontend em React
+- Filtro de produtos por categoria
+- Busca por nome
+- Dashboard para admin
+- Entre outras funcionalidades, vou atualizando conforme desenvolvimento
 
 ---
 
 ## 📬 Como rodar o projeto
 
 ```bash
-# Instale as dependências
+# Instalar dependências
 yarn install
 
-# Configure as variáveis de ambiente
+# Configurar variáveis de ambiente
 cp .env.example .env
+# e edite o arquivo com suas credenciais
 
-# Execute as migrations
+# Criar tabelas no PostgreSQL
 yarn sequelize db:migrate
 
-# Inicie o servidor
+# Iniciar servidor
 yarn dev
